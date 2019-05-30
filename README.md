@@ -2,7 +2,12 @@
 
 Allows getting thread id (SPID) from [Haxe](https://www.haxe.org) on Linux cpp target. The library has a more general name, so later features may be added in necessary.
 
-`Sys.gettid() : Int` returns the thread id (SPID) from the current thrad.
+There only one method so far:
+
+* `Sys.getThreadId() : Int` 
+> return thread id (SPID) from the current thread. 
+> This will return the PID when called from the main thread. 
+> This only works on Linux.
 
 ## How to install
 
