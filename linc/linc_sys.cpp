@@ -2,11 +2,19 @@
 #include <hxcpp.h>
 #include "./linc_sys.h"
 
+// for _getThreadId()
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
 
+// for _getNonBlockingChar() (+ unistd.h)
+#include <stdlib.h>
+#include <string.h>
+#include <sys/select.h>
+#include <termios.h>
 
 namespace linc {
 
@@ -41,6 +49,80 @@ namespace linc {
             // "As PlasmaHH notes, gettid() is called via syscall(). From the
             // syscall() man page:"
             return ::syscall(SYS_gettid);
+        }
+
+
+        /**
+         * Return 0 if there was no key pressed, otherwise return 
+         * the charcode of the key. This is non-blocking.
+         * If there are several such keys, this will only return the first one.
+         */
+        int _getNonBlockingChar(void) {
+            if (nonblockingchar::is_canonical) 
+                nonblockingchar::set_conio_terminal_mode();
+            return nonblockingchar::kbhit() 
+                ? nonblockingchar::getch()
+                : 0
+            ;
+        }
+
+        /**
+         * The default, to read until CR/LF.
+         * This will also call atexit() so default canonical
+         * is set (only once) at program exit.
+         */
+        void _resetTermToCanonicalMode() {
+            nonblockingchar::reset_terminal_mode();
+        }
+
+        namespace nonblockingchar {
+            bool is_canonical = true;               // we sit in  canonical by default
+            bool has_atexit_been_set = false;   
+            struct termios orig_termios;            // default, canonical
+            struct termios new_termios;             // non-canonical
+
+            // this needs be called before exiting
+            // to restore canonical mode (i.e. waiting ENTER key)
+            void reset_terminal_mode() {
+                tcsetattr(0, TCSANOW, &orig_termios);
+                is_canonical = true;
+            }
+
+            // will set to canonical if needed
+            void set_conio_terminal_mode() {
+                if (!has_atexit_been_set) {
+                    tcgetattr(0, &orig_termios);
+                }
+                if (is_canonical) {
+                    memcpy(&new_termios, &orig_termios, sizeof(new_termios));
+                    if (!has_atexit_been_set) {
+                        atexit(reset_terminal_mode);
+                        has_atexit_been_set = true;
+                    }
+                    cfmakeraw(&new_termios);
+                    tcsetattr(0, TCSANOW, &new_termios);
+                    is_canonical = false;
+                }
+            }
+
+            int kbhit() {
+                struct timeval tv = { 0L, 0L };
+                fd_set fds;
+                FD_ZERO(&fds);
+                FD_SET(0, &fds);
+                return select(1, &fds, NULL, NULL, &tv);
+            }
+
+            int getch() {
+                int r;
+                unsigned char c;
+                if ((r = read(0, &c, sizeof(c))) < 0) {
+                    return r;
+                } else {
+                    return c;
+                }
+            }
+
         }
     }
 

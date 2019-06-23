@@ -13,4 +13,9 @@ extern class ExternalSys {
     @:native("linc::ns_sys::_getThreadId")
     static function _getThreadId() : Int;
 
+    @:native("linc::ns_sys::_getNonBlockingChar")
+    static function _getNonBlockingChar() : Int;
+
+    @:native("linc::ns_sys::_resetTermToCanonicalMode")
+    static function _resetTermToCanonicalMode() : Void;
 }
