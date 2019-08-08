@@ -18,4 +18,7 @@ extern class ExternalSys {
 
     @:native("linc::ns_sys::_resetTermToCanonicalMode")
     static function _resetTermToCanonicalMode() : Void;
+
+    @:native("linc::ns_sys::_systemd_notify")
+    static function _systemd_notify(msg:String, unset_environment:Int) : Int;
 }

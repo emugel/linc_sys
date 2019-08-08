@@ -23,6 +23,11 @@ class Test {
         // s.id = 34;              // this should coredump on cpp
                                    // allowing to check whether
                                    // canonical mode worked:  YES
+
+        // A useless systemd notify (useless because you'd have to create
+        // a service and this is just a test)
+        Sys.systemd_notify_service_is_stopping();
+
         trace("Bye!");
     }
 

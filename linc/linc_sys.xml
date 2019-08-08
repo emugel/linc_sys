@@ -16,7 +16,9 @@
     <target id="haxe">
 
         <!-- add linker flags to the haxe build output -->
-
+        <section if="linux">
+            <lib name="-lsystemd" />
+        </section>
     </target>
 
 </xml>

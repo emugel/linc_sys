@@ -16,6 +16,8 @@
 #include <sys/select.h>
 #include <termios.h>
 
+#include <systemd/sd-daemon.h>
+
 namespace linc {
 
     namespace ns_sys {
@@ -51,6 +53,13 @@ namespace linc {
             return ::syscall(SYS_gettid);
         }
 
+        /**
+         * Systemd notify. See README.md
+         * @param (const char *state) The string to send, e.g. "WATCHDOG=1"
+         * @param (int unset_environment) A non-zero value will unset $NOTIFY_SOCKET
+         * @return (int) 0 if no error or if $NOTIFY_SOCKET was previously unset. Negative errorcode otherwise.
+         */
+        int _systemd_notify(const char *state, int unset_environment) { return sd_notify(unset_environment, state); }
 
         /**
          * Return 0 if there was no key pressed, otherwise return 
@@ -72,7 +81,8 @@ namespace linc {
          * is set (only once) at program exit.
          */
         void _resetTermToCanonicalMode() {
-            nonblockingchar::reset_terminal_mode();
+            if (!nonblockingchar::is_canonical) 
+                nonblockingchar::reset_terminal_mode();
         }
 
         namespace nonblockingchar {
