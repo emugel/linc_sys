@@ -14,7 +14,7 @@ class Sys {
     public static function systemd_notify_service_is_ready(unset_environment:Bool=false) : Int return systemd_notify("READY=1", unset_environment);
     public static function systemd_notify_service_is_reloading_config(unset_environment:Bool=false) : Int return systemd_notify("RELOADING=1", unset_environment);
     public static function systemd_notify_service_is_stopping(unset_environment:Bool=false) : Int return systemd_notify("STOPPING=1", unset_environment);
-    public static function systemd_notify_update_status(anything:String, unset_environment:Bool=false) : Int return systemd_notify(anything, unset_environment);
+    public static function systemd_notify_update_status(anything:String, unset_environment:Bool=false) : Int return systemd_notify("STATUS=" + anything, unset_environment);
     public static function systemd_notify_errno(n:Int, unset_environment:Bool=false) : Int return systemd_notify("ERRNO=" + Std.string(n), unset_environment);
     public static function systemd_notify_buserror(dbusErrorCode:String, unset_environment:Bool=false) : Int return systemd_notify("BUSERROR=" + Std.string(dbusErrorCode), unset_environment);
     public static function systemd_notify_watchdog_heartbeat(unset_environment:Bool=false) : Int return systemd_notify("WATCHDOG=1", unset_environment);
